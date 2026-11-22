@@ -4,13 +4,25 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { W, M, COL, THEMES, text, width, arrow, vline, hline, doc, r } from './lib.mjs';
+import { W, M, COL, THEMES, text, width, arrow, vline, hline, doc, r, glyphSet } from './lib.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const OUT = path.join(HERE, '..', 'assets');
 fs.mkdirSync(OUT, { recursive: true });
 
-const img = (name) => `data:image/jpeg;base64,${fs.readFileSync(path.join(HERE, 'images', name)).toString('base64')}`;
+// Portrait ASCII (traits + ombrage), précalculé par portrait/ascii.mjs.
+const PORTRAIT = JSON.parse(fs.readFileSync(path.join(HERE, 'portrait.json'), 'utf8'));
+function asciiPortrait(T, theme, x0, y0, w, h) {
+  const grid = PORTRAIT[theme], { cols, rows } = PORTRAIT;
+  const cw = w / cols, lh = h / rows;
+  const G = glyphSet('mono', cw / 0.6, `a${theme[0]}`);
+  const lines = grid.map((line, r) => {
+    const uses = [];
+    Array.from(line).forEach((ch, c) => { if (ch !== ' ') uses.push(G.use(ch, x0 + c * cw, y0 + (r + 0.8) * lh)); });
+    return uses.length ? `<g class="row" style="animation-delay:${(0.25 + r * 0.025).toFixed(3)}s">${uses.join('')}</g>` : '';
+  });
+  return `<defs>${G.defs()}</defs><g fill="${T.ink}">${lines.join('')}</g>`;
+}
 
 // Dessin axonométrique au trait (lignes cachées masquées par la couleur de fond).
 function axo(T, ox, oy, s) {
@@ -73,9 +85,7 @@ function intro(theme) {
   lines.forEach(([l, c], i) => b.push(`<g class="in" ${d(0.15 + i * 0.07)}>${text('semibold', l, M - 3, 160 + i * 66, 64, c, { tr: -2.4 })}</g>`));
   ['J’aime comprendre pourquoi une interface fonctionne,', 'puis la dessiner dans Figma et la coder pour de vrai.']
     .forEach((l, i) => b.push(`<g class="in" ${d(0.4 + i * 0.05)}>${text('regular', l, M, 352 + i * 29, 20, T.ink)}</g>`));
-  b.push(`<clipPath id="ph"><rect x="${PX}" y="72" width="${W - PX}" height="348"/></clipPath>`
-    + `<filter id="bw"><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncR type="linear" slope="1.08" intercept="-0.03"/><feFuncG type="linear" slope="1.08" intercept="-0.03"/><feFuncB type="linear" slope="1.08" intercept="-0.03"/></feComponentTransfer></filter>`
-    + `<g class="photo"><image href="${img('portrait.jpg')}" x="${PX}" y="20" width="${W - PX}" height="500" preserveAspectRatio="xMidYMid slice" clip-path="url(#ph)" filter="url(#bw)"/></g>`);
+  b.push(asciiPortrait(T, theme, PX + 10, 84, W - PX - 20, 326));
   b.push(vline(PX, 72, 420, T.rule), hline(420, 0, W, T.rule));
 
   // ---- Bandes à libellé
@@ -119,10 +129,10 @@ function intro(theme) {
 
   return doc({
     h: H, title: 'Nicolas Delli Muti',
-    desc: 'Nicolas Delli Muti, étudiant en informatique à Mons. Passionné d’UI/UX design, il apprend pour en faire de vraies compétences. En mars 2026, encore étudiant, il a lancé son studio créatif solo, Vision Studio : des sites et des identités visuelles pour de vrais clients. Il aime toucher à tout et cherche encore ce qu’il aime vraiment faire ; son parcours : architecture, ingénieur, informatique, marketing, gestion, design, et aujourd’hui l’informatique. Passionné d’architecture, il la transmet sur Minecraft avec Strawberry Crew. Un dessin axonométrique au trait montre une tour.',
+    desc: 'Nicolas Delli Muti, étudiant en informatique à Mons. Passionné d’UI/UX design, il apprend pour en faire de vraies compétences. En mars 2026, encore étudiant, il a lancé son studio créatif solo, Vision Studio : des sites et des identités visuelles pour de vrais clients. Il aime toucher à tout et cherche encore ce qu’il aime vraiment faire ; son parcours : architecture, ingénieur, informatique, marketing, gestion, design, et aujourd’hui l’informatique. Passionné d’architecture, il la transmet sur Minecraft avec Strawberry Crew. Un portrait en ASCII de Nicolas et un dessin axonométrique au trait d’une tour illustrent la page.',
     style: `
-.photo { animation: photo 1.4s .2s cubic-bezier(.2,.7,.2,1) both; }
-@keyframes photo { from { opacity: 0; } to { opacity: 1; } }
+.row { animation: row .5s steps(4) both; }
+@keyframes row { from { opacity: 0; } to { opacity: 1; } }
 .grow { transform-box: fill-box; transform-origin: left; animation: grow 1.4s .7s cubic-bezier(.6,0,.2,1) both; }
 @keyframes grow { from { transform: scaleX(0); } to { transform: none; } }
 .draw { stroke-dasharray: 1; animation: draw 1.6s cubic-bezier(.6,0,.2,1) both; }

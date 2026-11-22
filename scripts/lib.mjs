@@ -18,7 +18,7 @@ export const THEMES = {
   dark: { ink: '#F5F5F4', sub: '#8B8B8B', rule: '#2A2E35', dot0: '#1B1F25', bg: '#0D1117', live: '#22C55E', pill: '#11151B' },
 };
 
-const FILES = { semibold: 'Switzer-Semibold.otf', medium: 'Switzer-Medium.otf', regular: 'Switzer-Regular.otf' };
+const FILES = { semibold: 'Switzer-Semibold.otf', medium: 'Switzer-Medium.otf', regular: 'Switzer-Regular.otf', mono: 'FragmentMono-Regular.ttf' };
 const cache = {};
 const font = (n) => (cache[n] ??= opentype.loadSync(path.join(here, 'fonts', FILES[n])));
 export const r = (n) => Math.round(n * 100) / 100;
@@ -31,6 +31,20 @@ function pathData(p) {
         : c.type === 'C' ? 'C' + [c.x1, c.y1, c.x2, c.y2, c.x, c.y].map(n).join(' ') : 'Z').join('');
 }
 const glyphs = (F, s) => Array.from(s).map((c) => F.charToGlyph(c));
+
+// Texte en <use> : chaque glyphe est stocké une fois (utile pour l'ASCII).
+export function glyphSet(f, size, prefix) {
+  const F = font(f), k = size / F.unitsPerEm, used = new Map();
+  return {
+    adv: (ch) => F.charToGlyph(ch).advanceWidth * k,
+    use(ch, x, y) {
+      const g = F.charToGlyph(ch);
+      if (!used.has(ch)) used.set(ch, `${prefix}${used.size}`);
+      return `<use href="#${used.get(ch)}" x="${r(x)}" y="${r(y)}"/>`;
+    },
+    defs: () => [...used].map(([ch, id]) => `<path id="${id}" d="${pathData(F.charToGlyph(ch).getPath(0, 0, size))}"/>`).join(''),
+  };
+}
 
 export function width(f, s, size, tr = 0) {
   const F = font(f), g = glyphs(F, s), k = size / F.unitsPerEm;
