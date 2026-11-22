@@ -14,8 +14,8 @@ export const COL = 300;       // début de la colonne de contenu
 export const HAIR = 1.4;      // ≈ 1 px une fois l'image réduite par GitHub
 
 export const THEMES = {
-  light: { ink: '#0A0A0A', sub: '#8A8A8A', rule: '#E4E4E2', dot0: '#EDEDEB', live: '#22C55E', pill: '#FFFFFF' },
-  dark: { ink: '#F5F5F4', sub: '#8B8B8B', rule: '#2A2E35', dot0: '#1B1F25', live: '#22C55E', pill: '#11151B' },
+  light: { ink: '#0A0A0A', sub: '#8A8A8A', rule: '#E4E4E2', dot0: '#EDEDEB', bg: '#FFFFFF', live: '#22C55E', pill: '#FFFFFF' },
+  dark: { ink: '#F5F5F4', sub: '#8B8B8B', rule: '#2A2E35', dot0: '#1B1F25', bg: '#0D1117', live: '#22C55E', pill: '#11151B' },
 };
 
 const FILES = { semibold: 'Switzer-Semibold.otf', medium: 'Switzer-Medium.otf', regular: 'Switzer-Regular.otf' };
