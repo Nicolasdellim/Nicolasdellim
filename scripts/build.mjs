@@ -150,7 +150,6 @@ function tools(theme) {
 const LINKS = [
   { id: 'site', label: 'vision-studio.be' },
   { id: 'instagram', label: 'Instagram' },
-  { id: 'email', label: 'Email' },
 ];
 // Même échelle que les grandes images (1200 de large) ; le premier lien
 // porte la marge de 64 pour s'aligner sur le texte au-dessus.

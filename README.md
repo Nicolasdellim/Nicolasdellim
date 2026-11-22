@@ -22,5 +22,3 @@
 <a href="https://vision-studio.be"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/lien-site-dark.svg"><img alt="vision-studio.be" src="assets/lien-site-light.svg" height="29"></picture></a>
 &nbsp;&nbsp;&nbsp;
 <a href="https://www.instagram.com/nicolasdellimuti/"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/lien-instagram-dark.svg"><img alt="Instagram" src="assets/lien-instagram-light.svg" height="29"></picture></a>
-&nbsp;&nbsp;&nbsp;
-<a href="mailto:EMAIL_A_DEFINIR"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/lien-email-dark.svg"><img alt="Email" src="assets/lien-email-light.svg" height="29"></picture></a>
