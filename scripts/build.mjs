@@ -158,7 +158,7 @@ function cell(l, i, theme) {
 
 for (const theme of ['light', 'dark']) {
   const files = { [`intro-${theme}.svg`]: intro(theme) };
-  LINKS.forEach((l, i) => (files[`lien-${l.id}-${theme}.svg`] = cell(l, i, theme)));
+  LINKS.forEach((l, i) => (files[`bande-${l.id}-${theme}.svg`] = cell(l, i, theme)));
   for (const [n, svg] of Object.entries(files)) {
     fs.writeFileSync(path.join(OUT, n), svg);
     console.log(`${n.padEnd(28)} ${(svg.length / 1024).toFixed(1)} kB`);
