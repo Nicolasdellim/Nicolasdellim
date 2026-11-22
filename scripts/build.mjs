@@ -1,173 +1,81 @@
-// Génère les SVG du README dans la DA Vision Studio :
-// noir et blanc, Switzer seule, fer à gauche, la fenêtre ( ) comme seul effet.
+// Génère les SVG statiques de /assets : la page d'intro et la rangée de liens.
+// DA de vision-studio.be : fond clair, filets fins, titre en deux tons, Switzer.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import opentype from 'opentype.js';
+import { W, M, COL, THEMES, text, width, arrow, vline, hline, doc, r } from './lib.mjs';
 
-const here = path.dirname(fileURLToPath(import.meta.url));
-const OUT = path.join(here, '..', 'assets');
+const OUT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'assets');
 fs.mkdirSync(OUT, { recursive: true });
 
-// ---------------------------------------------------------------- Thèmes
-const THEMES = {
-  light: { ink: '#000000', sub: '#767676', rule: '#BDBDBA' },
-  dark: { ink: '#FFFFFF', sub: '#8C8C8C', rule: '#3A3A38' },
-};
-
-// ---------------------------------------------------------------- Symbole ( )
-// Géométrie officielle (brand/src/geometry.json) : cadre 843 × 478.
-const SYM_W = 843, SYM_H = 478;
-const PAREN = 'M78.52 0A403 403 0 0 0 78.52 478L217.63 478A328.5 328.5 0 0 1 217.63 0Z';
-const WINDOW = 'M217.63 0A328.5 328.5 0 0 0 217.63 478L625.37 478A328.5 328.5 0 0 0 625.37 0Z';
-
-// ---------------------------------------------------------------- Texte → tracés
-const FONTS = { semibold: 'Switzer-Semibold.otf', medium: 'Switzer-Medium.otf', regular: 'Switzer-Regular.otf' };
-const cache = {};
-const font = (n) => (cache[n] ??= opentype.loadSync(path.join(here, 'fonts', FONTS[n])));
-const r = (n) => Math.round(n * 100) / 100;
-function d(p) {
-  const n = (v) => String(r(v));
-  return p.commands.map((c) =>
-    c.type === 'M' || c.type === 'L' ? c.type + n(c.x) + ' ' + n(c.y)
-      : c.type === 'Q' ? 'Q' + [c.x1, c.y1, c.x, c.y].map(n).join(' ')
-        : c.type === 'C' ? 'C' + [c.x1, c.y1, c.x2, c.y2, c.x, c.y].map(n).join(' ') : 'Z').join('');
-}
-function width(f, s, size, tr = 0) {
-  const F = font(f), g = Array.from(s).map((c) => F.charToGlyph(c)), k = size / F.unitsPerEm;
-  return g.reduce((w, gl, i) => w + gl.advanceWidth * k + (i < g.length - 1 ? F.getKerningValue(gl, g[i + 1]) * k + tr : 0), 0);
-}
-function text(f, s, x, y, size, fill, tr = 0) {
-  const F = font(f), g = Array.from(s).map((c) => F.charToGlyph(c)), k = size / F.unitsPerEm;
-  let cx = x, out = '';
-  g.forEach((gl, i) => {
-    out += d(gl.getPath(cx, y, size));
-    cx += gl.advanceWidth * k + (i < g.length - 1 ? F.getKerningValue(gl, g[i + 1]) * k + tr : 0);
-  });
-  return `<path d="${out}" fill="${fill}"/>`;
-}
-const img = (name) => `data:image/jpeg;base64,${fs.readFileSync(path.join(here, 'images', name)).toString('base64')}`;
-const esc = (s) => s.replace(/&/g, '&amp;');
-
-function doc({ w, h, title, desc, style = '', body }) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" fill="none" role="img" aria-labelledby="t d">
-<title id="t">${esc(title)}</title>
-<desc id="d">${esc(desc)}</desc>
-<style>${style}
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; } }</style>
-${body}
-</svg>
-`;
-}
-
-// Fenêtre ( ) : image entre les deux parenthèses, cadre posé en x, y, largeur w.
-function windowed(id, x, y, w, ink, href, { open = false } = {}) {
-  const k = w / SYM_W;
-  return `<clipPath id="${id}"><path d="${WINDOW}"/></clipPath>
-<g transform="translate(${r(x)} ${r(y)}) scale(${r(k * 1e4) / 1e4})">
-  <g${open ? ' class="reveal"' : ''}><image href="${href}" x="100" y="0" width="643" height="${SYM_H}" preserveAspectRatio="xMidYMid slice" clip-path="url(#${id})"/></g>
-  <g${open ? ' class="pl"' : ''}><path d="${PAREN}" fill="${ink}"/></g>
-  <g${open ? ' class="pr"' : ''}><path transform="translate(${SYM_W} 0) scale(-1 1)" d="${PAREN}" fill="${ink}"/></g>
-</g>`;
-}
-
-// ---------------------------------------------------------------- Bannière
-function hero(theme) {
+function intro(theme) {
   const T = THEMES[theme];
-  const W = 1200, H = 520, X = 64;
-  const logo = fs.readFileSync(path.join(here, 'images', 'vs-mot-symbole-noir.svg'), 'utf8').match(/ d="([^"]+)"/g).map((m) => m.slice(4, -1));
-  const lk = 22 / 214; // hauteur de capitale du logo : 22 px
-  const body = [
-    `<g transform="translate(${X} 64) scale(${r(lk * 1e4) / 1e4})">${logo.map((p) => `<path d="${p}" fill="${T.ink}"/>`).join('')}</g>`,
-    text('semibold', 'Nicolas', X - 4, 300, 96, T.ink, -3),
-    text('semibold', 'Delli Muti', X - 4, 392, 96, T.ink, -3),
-    text('regular', 'Designer web et graphique, fondateur de Vision Studio.', X, 446, 22, T.sub),
-    text('regular', 'Mons, Belgique.', X, 476, 22, T.sub),
-    windowed('wp', 640, 140, 496, T.ink, img('portrait.jpg'), { open: true }),
-  ];
+  const H = 552;
+  const b = [];
+  b.push(vline(1, 0, H, T.rule), vline(W - 1, 0, H, T.rule), hline(1, 0, W, T.rule));
+
+  // Bande du haut : nom à gauche, pastille à droite.
+  b.push(`<g class="in">${text('medium', 'Nicolas Delli Muti', M, 46, 18, T.ink)}</g>`);
+  const pill = 'Étudiant en informatique · Mons';
+  const pw = width('medium', pill, 14) + 44;
+  const px = W - M - pw;
+  b.push(`<g class="in" style="animation-delay:.08s"><rect x="${r(px)}" y="20" width="${r(pw)}" height="32" rx="16" fill="${T.pill}" stroke="${T.rule}" stroke-width="1.4"/>`
+    + `<circle cx="${r(px + 18)}" cy="36" r="4" fill="${T.live}"/>${text('medium', pill, px + 30, 41, 14, T.ink)}</g>`);
+  b.push(hline(72, 0, W, T.rule));
+
+  // Titre en deux tons, comme sur le site.
+  const HS = 64, LH = 66;
+  const lines = [['Passionné d’UI/UX design,', T.sub], ['j’apprends pour en faire', T.ink], ['de vraies compétences.', T.ink]];
+  lines.forEach(([l, c], i) => b.push(`<g class="in" style="animation-delay:${r(0.15 + i * 0.07)}s">${text('semibold', l, M - 3, 160 + i * LH, HS, c, { tr: -2.4 })}</g>`));
+  const P = ['J’aime comprendre pourquoi une interface fonctionne,', 'puis la dessiner dans Figma et la coder pour de vrai.'];
+  P.forEach((l, i) => b.push(`<g class="in" style="animation-delay:${r(0.4 + i * 0.05)}s">${text('regular', l, M, 352 + i * 29, 20, T.ink)}</g>`));
+  b.push(hline(420, 0, W, T.rule));
+
+  // Architecture.
+  b.push(`<g class="in" style="animation-delay:.55s">${text('regular', 'Architecture', M, 470, 16, T.sub)}`
+    + `${text('medium', 'L’architecture me passionne aussi.', COL, 472, 30, T.ink, { tr: -0.6 })}`
+    + `${text('medium', 'Je la transmets sur Minecraft avec Strawberry Crew.', COL, 512, 30, T.sub, { tr: -0.6 })}</g>`);
+  b.push(vline(COL - 24, 420, H, T.rule), hline(H - 1, 0, W, T.rule));
+
   return doc({
-    w: W, h: H, title: 'Nicolas Delli Muti',
-    desc: 'Nicolas Delli Muti, designer web et graphique, fondateur de Vision Studio, à Mons en Belgique. Son portrait apparaît dans la fenêtre du symbole ( ) de Vision Studio.',
-    style: `
-.pl { animation: pl 1.4s cubic-bezier(.7,0,.2,1) both; }
-.pr { animation: pr 1.4s cubic-bezier(.7,0,.2,1) both; }
-.reveal { animation: reveal 1.4s cubic-bezier(.7,0,.2,1) both; }
-@keyframes pl { from { transform: translateX(260px); } to { transform: none; } }
-@keyframes pr { from { transform: translateX(-260px); } to { transform: none; } }
-@keyframes reveal { 0%, 35% { opacity: 0; } 100% { opacity: 1; } }`,
-    body: body.join('\n'),
+    h: H, title: 'Nicolas Delli Muti',
+    desc: 'Nicolas Delli Muti, étudiant en informatique à Mons. Passionné d’UI/UX design, il apprend pour en faire de vraies compétences : comprendre pourquoi une interface fonctionne, la dessiner dans Figma et la coder. Passionné d’architecture, il la transmet sur Minecraft avec Strawberry Crew.',
+    body: b.join('\n'),
   });
 }
 
-// ---------------------------------------------------------------- Projets
-const PROJECTS = [
-  { file: 'bisson.jpg', name: 'Lucas Bisson', what: 'Portfolio d’architecte' },
-  { file: 'brute.jpg', name: 'Brut.e', what: 'Site de podcast' },
-  { file: 'shopsnkrs.jpg', name: 'ShopSnkrs', what: 'Boutique de sneakers' },
-];
-function projects(theme) {
-  const T = THEMES[theme];
-  const W = 1200, X = 64, G = 24;
-  const cw = (W - 2 * X - 2 * G) / 3, ch = cw * (SYM_H / SYM_W);
-  const top = 112;
-  const body = [text('semibold', 'Projets', X - 2, 72, 40, T.ink, -1)];
-  PROJECTS.forEach((p, i) => {
-    const x = X + i * (cw + G);
-    body.push(windowed(`w${i}`, x, top, cw, T.ink, img(p.file)));
-    body.push(text('medium', p.name, x, top + ch + 44, 22, T.ink));
-    body.push(text('regular', p.what, x, top + ch + 72, 18, T.sub));
-  });
-  return doc({
-    w: W, h: Math.ceil(top + ch + 96), title: 'Projets',
-    desc: `Projets réalisés avec Vision Studio : ${PROJECTS.map((p) => `${p.name}, ${p.what.toLowerCase()}`).join(' ; ')}.`,
-    body: body.join('\n'),
-  });
-}
-
-// ---------------------------------------------------------------- Outils
-const TOOLS = [
-  ['Design', ['Figma', 'Framer', 'Webflow', 'Canva']],
-  ['Développement', ['Next.js', 'Tailwind CSS', 'Supabase', 'Vercel']],
-  ['IA', ['Claude', 'ChatGPT', 'Cursor', 'Gemini']],
-];
-function tools(theme) {
-  const T = THEMES[theme];
-  const W = 1200, X = 64, cw = (W - 2 * X) / 3;
-  const body = [text('semibold', 'Outils', X - 2, 72, 40, T.ink, -1), `<rect x="${X}" y="104" width="${W - 2 * X}" height="1" fill="${T.rule}"/>`];
-  TOOLS.forEach(([label, items], i) => {
-    const x = X + i * cw;
-    body.push(text('regular', label, x, 144, 18, T.sub));
-    items.forEach((it, j) => body.push(text('medium', it, x, 184 + j * 32, 22, T.ink)));
-  });
-  return doc({
-    w: W, h: 184 + 3 * 32 + 36, title: 'Outils',
-    desc: TOOLS.map(([l, it]) => `${l} : ${it.join(', ')}`).join('. ') + '.',
-    body: body.join('\n'),
-  });
-}
-
-// ---------------------------------------------------------------- Liens (une image par lien)
+// Rangée de liens : trois cellules posées côte à côte dans le README.
+// La première fait la largeur de la colonne des libellés (23 %), les deux autres 38,5 %,
+// pour que les filets verticaux tombent sur ceux des bandes au-dessus et en dessous.
+const CELLS = [COL - 24, (W - COL + 24) / 2, (W - COL + 24) / 2];
 const LINKS = [
-  { id: 'site', label: 'vision-studio.be' },
-  { id: 'instagram', label: 'Instagram' },
+  { id: 'strawberry', label: 'Minecraft', value: 'Strawberry Crew' },
+  { id: 'instagram', label: 'Instagram', value: '@nicolasdellimuti' },
+  { id: 'studio', label: 'Studio', value: 'vision-studio.be' },
 ];
-// Même échelle que les grandes images (1200 de large) ; le premier lien
-// porte la marge de 64 pour s'aligner sur le texte au-dessus.
-function link(l, theme, first) {
+function cell(l, i, theme) {
   const T = THEMES[theme];
-  const S = 26, x0 = first ? 64 : 0, ax = x0 + width('medium', l.label, S) + 14;
+  const CW = CELLS[i], H = 104;
+  const x = i === 0 ? M : 24;
+  const vw = width('medium', l.value, 22);
   return doc({
-    w: Math.ceil(ax + 22), h: 40, title: l.label, desc: `Lien : ${l.label}`,
-    body: `${text('medium', l.label, x0, 29, S, T.ink)}
-<path d="M${r(ax)} 28 L${r(ax + 13)} 15 M${r(ax + 3)} 15 H${r(ax + 13)} V25" stroke="${T.ink}" stroke-width="2.2" fill="none"/>`,
+    w: CW, h: H, title: l.value, desc: `${l.label} : ${l.value}`,
+    body: [
+      vline(1, 0, H, T.rule), i === 2 ? vline(CW - 1, 0, H, T.rule) : '', hline(H - 1, 0, CW, T.rule),
+      `<g class="in" style="animation-delay:${r(0.65 + i * 0.06)}s">`,
+      text('regular', l.label, x, 40, 15, T.sub),
+      text('medium', l.value, x, 74, 22, T.ink),
+      arrow(x + vw + 10, 72, 22, T.ink),
+      '</g>',
+    ].join('\n'),
   });
 }
 
 for (const theme of ['light', 'dark']) {
-  const files = { [`hero-${theme}.svg`]: hero(theme), [`projets-${theme}.svg`]: projects(theme), [`outils-${theme}.svg`]: tools(theme) };
-  LINKS.forEach((l, i) => (files[`lien-${l.id}-${theme}.svg`] = link(l, theme, i === 0)));
+  const files = { [`intro-${theme}.svg`]: intro(theme) };
+  LINKS.forEach((l, i) => (files[`lien-${l.id}-${theme}.svg`] = cell(l, i, theme)));
   for (const [n, svg] of Object.entries(files)) {
     fs.writeFileSync(path.join(OUT, n), svg);
-    console.log(`${n.padEnd(26)} ${(svg.length / 1024).toFixed(1)} kB`);
+    console.log(`${n.padEnd(28)} ${(svg.length / 1024).toFixed(1)} kB`);
   }
 }

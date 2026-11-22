@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "build": "node build.mjs",
-    "preview": "python3 -m http.server 8765"
+    "preview": "python3 -m http.server 8765",
+    "activity": "node activity.mjs Nicolasdellim ../dist"
   },
   "dependencies": {
     "opentype.js": "^1.3.4"

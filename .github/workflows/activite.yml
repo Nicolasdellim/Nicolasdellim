@@ -1,0 +1,45 @@
+name: Activité du profil
+
+on:
+  schedule:
+    - cron: "23 */6 * * *" # toutes les 6 heures
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["scripts/**", ".github/workflows/activite.yml"]
+
+permissions:
+  contents: write
+
+jobs:
+  activite:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: scripts/package-lock.json
+      - name: Installer
+        working-directory: scripts
+        run: npm ci
+      # Switzer (Fontshare) ne peut pas être redistribuée : on la récupère à la source.
+      - name: Télécharger Switzer
+        run: |
+          curl -sSL -o /tmp/switzer.zip https://api.fontshare.com/v2/fonts/download/switzer
+          unzip -j -o /tmp/switzer.zip 'Switzer_Complete/Fonts/OTF/Switzer-Regular.otf' 'Switzer_Complete/Fonts/OTF/Switzer-Medium.otf' 'Switzer_Complete/Fonts/OTF/Switzer-Semibold.otf' -d scripts/fonts
+      - name: Générer la grille d'activité
+        working-directory: scripts
+        run: node activity.mjs ${{ github.repository_owner }} ../dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publier sur la branche output
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: output
+          commit_message: "Mise à jour de l'activité [skip ci]"
+          force_orphan: true

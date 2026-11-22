@@ -1,24 +1,3 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/hero-dark.svg">
-  <img alt="Nicolas Delli Muti — designer web et graphique, fondateur de Vision Studio. Mons, Belgique." src="assets/hero-light.svg" width="100%">
-</picture>
-
-<br>
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/projets-dark.svg">
-  <img alt="Projets : Lucas Bisson, portfolio d’architecte ; Brut.e, site de podcast ; ShopSnkrs, boutique de sneakers." src="assets/projets-light.svg" width="100%">
-</picture>
-
-<br>
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/outils-dark.svg">
-  <img alt="Outils. Design : Figma, Framer, Webflow, Canva. Développement : Next.js, Tailwind CSS, Supabase, Vercel. IA : Claude, ChatGPT, Cursor, Gemini." src="assets/outils-light.svg" width="100%">
-</picture>
-
-<br>
-
-<a href="https://vision-studio.be"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/lien-site-dark.svg"><img alt="vision-studio.be" src="assets/lien-site-light.svg" height="29"></picture></a>
-&nbsp;&nbsp;&nbsp;
-<a href="https://www.instagram.com/nicolasdellimuti/"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/lien-instagram-dark.svg"><img alt="Instagram" src="assets/lien-instagram-light.svg" height="29"></picture></a>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/intro-dark.svg"><img alt="Nicolas Delli Muti, étudiant en informatique à Mons. Passionné d’UI/UX design, j’apprends pour en faire de vraies compétences : comprendre pourquoi une interface fonctionne, la dessiner dans Figma et la coder pour de vrai. L’architecture me passionne aussi : je la transmets sur Minecraft avec Strawberry Crew." src="assets/intro-light.svg" width="100%" align="left"></picture>
+<a href="https://strawberrycrew.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/lien-strawberry-dark.svg"><img alt="Minecraft : Strawberry Crew (strawberrycrew.com)" src="assets/lien-strawberry-light.svg" width="23%" align="left"></picture></a><a href="https://www.instagram.com/nicolasdellimuti/"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/lien-instagram-dark.svg"><img alt="Instagram : @nicolasdellimuti" src="assets/lien-instagram-light.svg" width="38.5%" align="left"></picture></a><a href="https://vision-studio.be"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/lien-studio-dark.svg"><img alt="Studio : vision-studio.be" src="assets/lien-studio-light.svg" width="38.5%" align="left"></picture></a>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Nicolasdellim/Nicolasdellim/output/activite-dark.svg"><img alt="Activité GitHub des 12 derniers mois en grille de points." src="https://raw.githubusercontent.com/Nicolasdellim/Nicolasdellim/output/activite-light.svg" width="100%" align="left"></picture>
