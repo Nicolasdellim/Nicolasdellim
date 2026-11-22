@@ -131,28 +131,26 @@ function intro(theme) {
   });
 }
 
-// Rangée de liens : trois cellules posées côte à côte dans le README.
-// La première fait la largeur de la colonne des libellés (23 %), les deux autres 38,5 %,
-// pour que les filets verticaux tombent sur ceux des bandes au-dessus et en dessous.
-const CELLS = [COL - 24, (W - COL + 24) / 2, (W - COL + 24) / 2];
+// Liens : une bande pleine largeur par lien (libellé à gauche, lien dans la colonne
+// de contenu). GitHub ajoute 20 px de marge à droite des images flottantes, ce qui
+// interdit de poser plusieurs cases côte à côte ; des bandes à 100 % s'empilent sans souci.
 const LINKS = [
-  { id: 'strawberry', label: 'Minecraft', value: 'Strawberry Crew' },
+  { id: 'strawberry', label: 'Minecraft', value: 'strawberrycrew.com' },
   { id: 'instagram', label: 'Instagram', value: '@nicolasdellimuti' },
   { id: 'studio', label: 'Studio', value: 'vision-studio.be' },
 ];
 function cell(l, i, theme) {
   const T = THEMES[theme];
-  const CW = CELLS[i], H = 104;
-  const x = i === 0 ? M : 24;
+  const H = 76;
   const vw = width('medium', l.value, 22);
   return doc({
-    w: CW, h: H, title: l.value, desc: `${l.label} : ${l.value}`,
+    h: H, title: l.value, desc: `${l.label} : ${l.value}`,
     body: [
-      vline(1, 0, H, T.rule), i === 2 ? vline(CW - 1, 0, H, T.rule) : '', hline(H - 1, 0, CW, T.rule),
+      vline(1, 0, H, T.rule), vline(W - 1, 0, H, T.rule), vline(COL - 24, 0, H, T.rule), hline(H - 1, 0, W, T.rule),
       `<g class="in" style="animation-delay:${r(0.65 + i * 0.06)}s">`,
-      text('regular', l.label, x, 40, 15, T.sub),
-      text('medium', l.value, x, 74, 22, T.ink),
-      arrow(x + vw + 10, 72, 22, T.ink),
+      text('regular', l.label, M, 45, 16, T.sub),
+      text('medium', l.value, COL, 46, 22, T.ink),
+      arrow(COL + vw + 10, 44, 22, T.ink),
       '</g>',
     ].join('\n'),
   });
