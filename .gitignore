@@ -1,0 +1,6 @@
+node_modules/
+dist/
+preview.html
+shot.sh
+.DS_Store
+scripts/fonts/Switzer-*.otf

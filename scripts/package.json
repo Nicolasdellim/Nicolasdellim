@@ -1,0 +1,7 @@
+{
+  "name": "nicolasdellim-profile",
+  "private": true,
+  "type": "module",
+  "scripts": { "build": "node build.mjs", "activity": "node activity.mjs Nicolasdellim ../dist" },
+  "dependencies": { "opentype.js": "^1.3.4", "simple-icons": "^15.0.0" }
+}
