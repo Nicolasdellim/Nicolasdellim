@@ -13,13 +13,15 @@ fs.mkdirSync(OUT, { recursive: true });
 // Portrait ASCII (traits + ombrage), précalculé par portrait/ascii.mjs.
 const PORTRAIT = JSON.parse(fs.readFileSync(path.join(HERE, 'portrait.json'), 'utf8'));
 function asciiPortrait(T, theme, x0, y0, w, h) {
-  const grid = PORTRAIT[theme], { cols, rows } = PORTRAIT;
+  const { chars, levels } = PORTRAIT[theme], { cols, rows } = PORTRAIT;
   const cw = w / cols, lh = h / rows;
   const G = glyphSet('mono', cw / 0.6, `a${theme[0]}`);
-  const lines = grid.map((line, r) => {
-    const uses = [];
-    Array.from(line).forEach((ch, c) => { if (ch !== ' ') uses.push(G.use(ch, x0 + c * cw, y0 + (r + 0.8) * lh)); });
-    return uses.length ? `<g class="row" style="animation-delay:${(0.25 + r * 0.025).toFixed(3)}s">${uses.join('')}</g>` : '';
+  const OPA = { 1: 0.32, 2: 0.55, 3: 0.8, 4: 1 };
+  const lines = chars.map((line, r) => {
+    const byLevel = { 1: [], 2: [], 3: [], 4: [] };
+    Array.from(line).forEach((ch, c) => { const lv = levels[r][c]; if (ch !== ' ' && lv !== '0') byLevel[lv].push(G.use(ch, x0 + c * cw, y0 + (r + 0.8) * lh)); });
+    const parts = Object.entries(byLevel).filter(([, u]) => u.length).map(([lv, u]) => (lv === '4' ? u.join('') : `<g opacity="${OPA[lv]}">${u.join('')}</g>`));
+    return parts.length ? `<g class="row" style="animation-delay:${(0.25 + r * 0.02).toFixed(3)}s">${parts.join('')}</g>` : '';
   });
   return `<defs>${G.defs()}</defs><g fill="${T.ink}">${lines.join('')}</g>`;
 }
